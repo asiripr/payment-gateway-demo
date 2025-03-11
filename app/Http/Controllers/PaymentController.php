@@ -4,47 +4,52 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Stripe\Charge;
+use Stripe\Checkout\Session;
 use Stripe\Stripe;
 use Stripe\Token;
 
 class PaymentController extends Controller
 {
-    public function showPayment(){
+    public function showPayment()
+    {
         return view('payment');
     }
-    public function processPayment(Request $request){
-        $request->validate([
-            'card_number' => 'required',
-            'expiry_month' => 'required',
-            'expiry_year' => 'required',
-            'cvc' => 'required',
-        ]);
+    public function processPayment(Request $request)
+    {
         try {
             //set stripe api key
-            Stripe::setApiKey(env('SSTRIPE_SECRET'));
+            Stripe::setApiKey(env('STRIPE_SECRET'));
 
-            // let's create a token using card details
-            $token = Token::create([
-                'card' => [
-                    'number' => $request->card_number,
-                    'exp_month' => $request->expiry_month,
-                    'exp_year' => $request->expiry_year,
-                    'cvc' => $request->cvc,
-                ]
+            // create a stripe checkout session
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'lkr',
+                        'product_data' => [
+                            'name' => 'Payment for your vegitables',
+                        ],
+                        'unit_amount' => 100000 // amount has given in cents
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => route('payment.success'),
+                'cancel_url' => route('payment.cancel'),
             ]);
-
-            // create a charge
-            $charge = Charge::create([
-                'amount' => 1000, // amount in cents
-                'currency' => 'usd',
-                'source' => $token->id,
-                'description' => 'demonstration'
-            ]);
-
-            return back()->with('success', 'payment successfull!');
-            
+            return redirect($session->url);
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function success()
+    {
+        return "Payment successful!";
+    }
+
+    public function cancel()
+    {
+        return "Payment cancelled.";
     }
 }

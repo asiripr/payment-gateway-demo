@@ -7,6 +7,11 @@
     <title>Payment Gateway Demo</title>
 </head>
 <body>
-    <h1>Payment Gateway Demo</h1>
+    <h1>Welcome Eco mart fresh vegitable house</h1>
+    <form action="{{ url('/payment') }}" method="GET">
+        <button type="submit">
+            Payment
+        </button>
+    </form>
 </body>
 </html>
