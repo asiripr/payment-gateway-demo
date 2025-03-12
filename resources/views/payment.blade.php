@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Payment Form</title>
+    <!-- ... existing head content ... -->
 </head>
 <body>
     <h1>Make a Payment</h1>
+
+    @if ($errors->any())
+        <div style="color: red;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     @if(session('success'))
         <p style="color: green;">{{ session('success') }}</p>
@@ -17,9 +24,24 @@
         <p style="color: red;">{{ session('error') }}</p>
     @endif
 
-    <form action="{{ route('payment.process') }}" method="POST">      
+    <form action="{{ route('payment.process') }}" method="POST">
         @csrf
-        <button type="submit">Pay LKR 10.00</button>
+        <div>
+            <label for="name">Full Name:</label>
+            <input type="text" name="name" id="name" required value="{{ old('name') }}">
+        </div>
+        
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" required value="{{ old('email') }}">
+        </div>
+        
+        <div>
+            <label for="amount">Amount (LKR):</label>
+            <input type="number" name="amount" id="amount" min="1" step="0.01" required value="{{ old('amount') }}">
+        </div>
+
+        <button type="submit">Pay Now</button>
     </form>
 </body>
 </html>
